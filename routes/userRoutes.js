@@ -1,0 +1,10 @@
+const express = require("express");
+const { fetchAllUsers, updateProfile } = require("../controllers/userController");
+const authMiddleware = require("../middleware/authMiddleware");
+
+const router = express.Router();
+
+router.get("/user/getAllUsers", fetchAllUsers);
+router.put("/user/profile", authMiddleware, updateProfile);
+
+module.exports = router;
