@@ -1,4 +1,5 @@
 const User = require("../models/auth");
+const { hashPassword } = require("../utils/hash");
 const { comparePassword } = require("../utils/hash");
 const { generateToken } = require("../utils/token");
 
@@ -14,7 +15,9 @@ const signup = async (req, res) => {
             });
         }
 
-        const user = await User.createUser(email, password);
+        // const user = await User.createUser(email, password);
+        const hashedPassword = await hashPassword(password);
+        const user = await User.createUser(email, hashedPassword);
 
         const token = generateToken(user);
 
@@ -45,8 +48,9 @@ const login = async (req, res) => {
                 status_code: 400
             });
         }
-
+        console.log("user:", user)
         const isMatch = await comparePassword(password, user.password_hash);
+        console.log("ismatch:", isMatch)
         if (!isMatch) {
             return res.status(400).json({
                 message: "Incorrect password",
