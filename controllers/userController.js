@@ -15,7 +15,11 @@ const fetchAllUsers = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const userId = req.user.id;
+        // const userId = req.user.id;
+        const userId = req.params.id;
+        if (req.user.id != userId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
         const { username, bio, avatar_url } = req.body;
         const updatedUser = await updateUserProfile(
             userId,
