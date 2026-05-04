@@ -1,9 +1,6 @@
 const db = require("../config/db");
-const { hashPassword, comparePassword } = require("../utils/hash");
 
-const createUser = async (email, password) => {
-    const hashedPassword = await hashPassword(password);
-
+const createUser = async (email, hashedPassword) => {
     const query = `
         INSERT INTO users (email, password_hash)
         VALUES ($1, $2)

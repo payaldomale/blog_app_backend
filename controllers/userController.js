@@ -13,16 +13,49 @@ const fetchAllUsers = async (req, res) => {
     }
 }
 
+// const updateProfile = async (req, res) => {
+//     try {
+//         // const userId = req.user.id;
+//         const userId = req.params.id;
+//         console.log("ID:", userId);
+//         console.log("id:", req.user.id);
+//         if (req.user.id != userId) {
+//             return res.status(403).json({ message: "Forbidden" });
+//         }
+//         const { username, bio, avatar_url } = req.body;
+//         const updatedUser = await updateUserProfile(
+//             userId,
+//             username,
+//             bio,
+//             avatar_url
+//         );
+
+//         res.json(updatedUser);
+
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).json({
+//             message: "Error updating profile"
+//         });
+//     }
+// };
+
 const updateProfile = async (req, res) => {
     try {
-        // const userId = req.user.id;
-        const userId = req.params.id;
-        if (req.user.id != userId) {
+        const targetUserId = parseInt(req.params.id);
+        const requester = req.user;
+
+        const isAdmin = requester.role === "admin";
+        const isSelf = requester.id === targetUserId;
+
+        if (!isAdmin && !isSelf) {
             return res.status(403).json({ message: "Forbidden" });
         }
+
         const { username, bio, avatar_url } = req.body;
+
         const updatedUser = await updateUserProfile(
-            userId,
+            targetUserId,
             username,
             bio,
             avatar_url
@@ -32,9 +65,7 @@ const updateProfile = async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        res.status(500).json({
-            message: "Error updating profile"
-        });
+        res.status(500).json({ message: "Error updating profile" });
     }
 };
 
