@@ -19,12 +19,9 @@ const signup = async (req, res) => {
         const hashedPassword = await hashPassword(password);
         const user = await User.createUser(email, hashedPassword);
 
-        const token = generateToken(user);
-
         res.status(201).json({
             message: "User successfully created",
             user,
-            token,
             status_code: 201
         });
 
