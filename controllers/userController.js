@@ -1,9 +1,9 @@
-const { getAllUsers, updateUserProfile } = require("../models/userModel");
+const { getAllUsers, searchUsers, updateUserProfile } = require("../models/userModel");
 
 const fetchAllUsers = async (req, res) => {
     try {
         const users = await getAllUsers();
-        // console.log(users);
+        console.log("-----------", users);
         return res.json(users);
     }
     catch (err) {
@@ -13,32 +13,22 @@ const fetchAllUsers = async (req, res) => {
     }
 }
 
-// const updateProfile = async (req, res) => {
-//     try {
-//         // const userId = req.user.id;
-//         const userId = req.params.id;
-//         console.log("ID:", userId);
-//         console.log("id:", req.user.id);
-//         if (req.user.id != userId) {
-//             return res.status(403).json({ message: "Forbidden" });
-//         }
-//         const { username, bio, avatar_url } = req.body;
-//         const updatedUser = await updateUserProfile(
-//             userId,
-//             username,
-//             bio,
-//             avatar_url
-//         );
+const getUsersByIdAndName = async (req, res) => {
+    try {
 
-//         res.json(updatedUser);
+        const { id, username } = req.query;
 
-//     } catch (err) {
-//         console.log(err);
-//         res.status(500).json({
-//             message: "Error updating profile"
-//         });
-//     }
-// };
+        const users = await searchUsers(id, username);
+
+        return res.status(200).json(users);
+
+    } catch (err) {
+
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+};
 
 const updateProfile = async (req, res) => {
     try {
@@ -69,4 +59,4 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { fetchAllUsers, updateProfile };
+module.exports = { fetchAllUsers, getUsersByIdAndName, updateProfile };

@@ -5,6 +5,23 @@ const getAllUsers = async () => {
     return result.rows;
 };
 
+const searchUsers = async (userId, username) => {
+
+    const query = `
+        SELECT id, username, bio
+        FROM users
+        WHERE id = $1
+           OR username ILIKE $2
+    `;
+
+    const result = await db.query(query, [
+        userId || 0,
+        `%${username || ""}%`
+    ]);
+
+    return result.rows;
+};
+
 const updateUserProfile = async (userId, username, bio, avatar_url) => {
     const query = `
         UPDATE users
@@ -26,4 +43,4 @@ const updateUserProfile = async (userId, username, bio, avatar_url) => {
     return result.rows[0];
 };
 
-module.exports = { getAllUsers, updateUserProfile };
+module.exports = { getAllUsers, searchUsers, updateUserProfile };
