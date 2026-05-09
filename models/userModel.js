@@ -43,4 +43,10 @@ const updateUserProfile = async (userId, username, bio, avatar_url) => {
     return result.rows[0];
 };
 
-module.exports = { getAllUsers, searchUsers, updateUserProfile };
+const removeUser = async (userId) => {
+    const query = `DELETE FROM users WHERE id=$1`;
+    const result = await db.query(query, [userId])
+    return result.rows[0];
+}
+
+module.exports = { getAllUsers, searchUsers, updateUserProfile, removeUser };

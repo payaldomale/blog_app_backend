@@ -1,4 +1,4 @@
-const { getAllUsers, searchUsers, updateUserProfile } = require("../models/userModel");
+const { getAllUsers, searchUsers, updateUserProfile, removeUser } = require("../models/userModel");
 
 const fetchAllUsers = async (req, res) => {
     try {
@@ -59,4 +59,22 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { fetchAllUsers, getUsersByIdAndName, updateProfile };
+const deleteUser = async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const dltUser = await removeUser(userId);
+        res.status(200).json({
+            message: "user successfully deleted",
+            userId
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            message: err.message,
+            status_code: 500
+        })
+        console.log("error:", err)
+    }
+}
+
+module.exports = { fetchAllUsers, getUsersByIdAndName, updateProfile, deleteUser };
