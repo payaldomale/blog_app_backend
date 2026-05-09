@@ -3,7 +3,7 @@ const { getAllUsers, searchUsers, updateUserProfile } = require("../models/userM
 const fetchAllUsers = async (req, res) => {
     try {
         const users = await getAllUsers();
-        console.log("-----------", users);
+        // console.log("-----------", users);
         return res.json(users);
     }
     catch (err) {

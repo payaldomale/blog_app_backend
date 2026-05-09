@@ -7,7 +7,7 @@ const getAllUsers = async () => {
 
 const searchUsers = async (userId, username) => {
 
-    const query = `
+    let query = `
         SELECT id, username, bio
         FROM users
         WHERE id = $1
@@ -15,8 +15,8 @@ const searchUsers = async (userId, username) => {
     `;
 
     const result = await db.query(query, [
-        userId || 0,
-        `%${username || ""}%`
+        userId || -1,
+        username ? `%${username}%` : "null"
     ]);
 
     return result.rows;

@@ -45,9 +45,9 @@ const login = async (req, res) => {
                 status_code: 400
             });
         }
-        console.log("user:", user)
+        // console.log("user:", user)
         const isMatch = await comparePassword(password, user.password_hash);
-        console.log("ismatch:", isMatch)
+        // console.log("ismatch:", isMatch)
         if (!isMatch) {
             return res.status(400).json({
                 message: "Incorrect password",
