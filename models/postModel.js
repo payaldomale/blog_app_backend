@@ -34,4 +34,16 @@ const createPost = async (
     return result.rows[0];
 };
 
-module.exports = { createPost };
+const getAllPosts = async () => {
+    const query = `SELECT * FROM posts`;
+    const result = await db.query(query);
+    return result.rows[0];
+}
+
+const getPostById = async (postId) => {
+    const query = `SELECT * FROM posts WHERE id=$1`;
+    const result = await db.query(query, [postId]);
+    return result.rows[0];
+}
+
+module.exports = { createPost, getAllPosts, getPostById };
