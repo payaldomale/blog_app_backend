@@ -1,0 +1,184 @@
+---------------------------------------------------
+🧩 Final Database Schema (Design Only)
+---------------------------------------------------
+
+🧑‍💻 User
+1. id (UUID, PK)
+2. username (string, unique)
+3. email (string, unique)
+4. password_hash (string)
+5. bio (text, optional)
+6. avatar_url (text, optional)
+7. created_at (timestamp)
+8. updated_at (timestamp)
+---------------------------------------------------
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(200) NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    bio TEXT,
+    avatar_url TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+---------------------------------------------------
+✍️ Post
+1. id (UUID, PK)
+2. author_id (FK → User.id)
+3. title (string)
+4. slug (string, unique)
+5. content (text)
+6. status (enum: draft | published)
+7. like_count (integer, default 0)
+8. comment_count (integer, default 0)
+9. published_at (timestamp, nullable)
+10. created_at (timestamp)
+11. updated_at (timestamp)
+---------------------------------------------------
+CREATE TYPE post_status AS ENUM ('draft', 'published');
+
+CREATE TABLE posts(
+	id SERIAL PRIMARY KEY,
+	author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+	title TEXT NOT NULL,
+	slug TEXT UNIQUE NOT NULL,
+	content TEXT,
+	status post_status DEFAULT 'draft',
+	like_count INTEGER DEFAULT 0,
+	comment_count INTEGER DEFAULT 0,
+	published_at TIMESTAMP,
+	created_at TIMESTAMP DEFAULT NOW(),
+	updated_at TIMESTAMP DEFAULT NOW()
+)
+---------------------------------------------------
+💬 Comment
+1. id (UUID, PK)
+2. post_id (FK → Post.id)
+3. author_id (FK → User.id)
+4. content (text)
+5. created_at (timestamp)
+6. updated_at (timestamp)
+---------------------------------------------------
+CREATE TABLE comments(
+	id SERIAL PRIMARY KEY,
+	post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+	author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+	content TEXT,
+	created_at TIMESTAMP DEFAULT NOW(),
+	updated_at TIMESTAMP DEFAULT NOW()
+);
+---------------------------------------------------
+❤️ Like
+1. user_id (FK → User.id)
+2. post_id (FK → Post.id)
+3. created_at (timestamp)
+👉 Composite Primary Key: (user_id, post_id)
+---------------------------------------------------
+CREATE TABLE likes(
+	user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+	post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+	created_at TIMESTAMP DEFAULT NOW(),
+	PRIMARY KEY (user_id, post_id)
+);
+---------------------------------------------------
+🏷️ Tag
+1. id (UUID, PK)
+2. name (string, unique)
+3. created_at (timestamp)
+---------------------------------------------------
+CREATE TABLE tag(
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(200) UNIQUE NOT NULL,
+	created_at TIMESTAMP DEFAULT NOW()
+);
+---------------------------------------------------
+🔗 PostTag (Join Table)
+1. post_id (FK → Post.id)
+2. tag_id (FK → Tag.id)
+👉 Composite Primary Key: (post_id, tag_id)
+---------------------------------------------------
+CREATE TABLE postTag(
+	post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+	tag_id INTEGER REFERENCES tag(id) ON DELETE CASCADE,
+	PRIMARY KEY (post_id, tag_id)
+);
+---------------------------------------------------
+🔗 Relationships Overview
+User → Post → One-to-Many
+User → Comment → One-to-Many
+Post → Comment → One-to-Many
+User ↔ Post (Like) → Many-to-Many
+Post ↔ Tag → Many-to-Many
+---------------------------------------------------
+CREATE INDEX idx_posts_author ON posts(author_id);
+CREATE INDEX idx_comments_post ON comments(post_id);
+CREATE INDEX idx_likes_post ON likes(post_id);
+CREATE INDEX idx_posts_slug ON posts(slug);
+---------------------------------------------------
+When you should switch to migrations?
+👉 NOT now
+Use migrations when:
+1. project grows
+2. team works on DB
+3. production deployment starts
+
+----------------------------------------------------
+**********AUTH-API**********
+1. signup
+2. login
+
+**********USER-API**********
+1. search user (id/username)
+2. update user profile
+3. get all users
+4. delete user
+
+**********POST-API**********
+1. Create Post
+2. Get All Posts
+3. Get Single Post
+4. Update Post
+5. Delete Post
+6. Get Posts By User
+7. Publish Draft
+8. Get Published Posts Only
+
+**********COMMENT-API**********
+1. create comment
+2. get comments by post
+3. update/delete comment
+
+**********LIKE-API**********
+1. like post
+2. unlike post
+
+**********TAG-API**********
+1. create tag
+2. attach tags to posts
+3. filter posts by tags
+
+**********PAGINATION-API**********
+➡️ Pagination
+➡️ Sorting
+➡️ Filtering
+
+**********ADDITIONAL-API**********
+➡️ File uploads
+➡️ Refresh tokens
+➡️ Email verification
+➡️ Password reset
+➡️ Role-based auth
+
+----------------------------------------------------------
+| Field         | Why backend controls it |
+| ------------- | ----------------------- |
+| id            | auto-generated PK       |
+| author_id     | from logged-in user     |
+| slug          | generated from title    |
+| like_count    | managed by likes API    |
+| comment_count | managed by comments API |
+| published_at  | depends on status       |
+| created_at    | DB timestamp            |
+| updated_at    | DB timestamp            |
+
