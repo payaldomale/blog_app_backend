@@ -46,4 +46,20 @@ const getPostById = async (postId) => {
     return result.rows[0];
 }
 
-module.exports = { createPost, getAllPosts, getPostById };
+const updatePost = async (id, title, content, status, published_at) => {
+    const query = `UPDATE posts SET title = $1, content = $2, status = $3, published_at = $4, updated_at = NOW() WHERE id = $5 RETURNING *`;
+
+    const values = [
+        id,
+        title,
+        content,
+        status,
+        published_at,
+    ];
+
+    const result = await db.query(query, values);
+
+    return result.rows[0];
+}
+
+module.exports = { createPost, getAllPosts, getPostById, updatePost };
