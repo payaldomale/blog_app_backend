@@ -44,7 +44,8 @@ const updateUserProfile = async (userId, username, bio, avatar_url) => {
 };
 
 const removeUser = async (userId) => {
-    const query = `DELETE FROM users WHERE id=$1`;
+    // const query = `DELETE FROM users WHERE id=$1`;
+    const query = `UPDATE users SET is_deleted = TRUE, deleted_at = NOW(), updated_at = NOW() WHERE id = $1 AND is_deleted = FALSE RETURNING *`;
     const result = await db.query(query, [userId])
     return result.rows[0];
 }

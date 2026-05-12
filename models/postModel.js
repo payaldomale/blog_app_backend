@@ -63,7 +63,8 @@ const updatePost = async (id, title, content, status, published_at) => {
 }
 
 const deletePost = async (id) => {
-    const query = `DELETE FROM posts WHERE id=$1`;
+    // const query = `DELETE FROM posts WHERE id=$1`;
+    const query = `UPDATE posts SET is_deleted = TRUE, deleted_at = NOW(), updated_at = NOW() WHERE id = $1 AND is_deleted = FALSE RETURNING *`;
     const result = await db.query(query, [id]);
     return result.rows[0];
 }

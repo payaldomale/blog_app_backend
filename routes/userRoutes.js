@@ -7,6 +7,6 @@ const router = express.Router();
 router.get("/user/getAllUsers", authMiddleware, fetchAllUsers);
 router.put("/user/profile/:id", authMiddleware, updateProfile);
 router.get("/user/search", authMiddleware, getUsersByIdAndName);
-router.delete("/user/delete/:id", authMiddleware, deleteUser)
+router.put("/user/delete/:id", authMiddleware, deleteUser)
 
 module.exports = router;

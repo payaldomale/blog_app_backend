@@ -7,6 +7,6 @@ router.post("/post/create", authMiddleware, addPost);
 router.get("/post/getAllPosts", authMiddleware, fetchAllPosts);
 router.get("/post/getPostbyId/:id", authMiddleware, fetchPostById);
 router.put("/post/updatePost/:id", authMiddleware, updatePostById);
-router.delete("/post/removePost/:id", authMiddleware, removePost);
+router.put("/post/removePost/:id", authMiddleware, removePost);
 
 module.exports = router;
