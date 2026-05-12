@@ -1,4 +1,4 @@
-const { createPost, getAllPosts, getPostById, updatePost } = require("../models/postModel");
+const { createPost, getAllPosts, getPostById, updatePost, deletePost } = require("../models/postModel");
 const { generateSlug } = require("../utils/slugify");
 
 const addPost = async (req, res) => {
@@ -121,4 +121,31 @@ const updatePostById = async (req, res) => {
     }
 };
 
-module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById };
+const removePost = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!id) {
+            res.status(404).json({
+                message: "id not found",
+                id,
+                status_code: 404
+            })
+        }
+        const rmvpost = await deletePost(id);
+        res.status(200).json({
+            message: "post successfully deleted",
+            id,
+            status_code: 200
+        })
+
+    }
+    catch (err) {
+        console.log("error:", err);
+        res.status(500).json({
+            message: err.message,
+            status_code: 500
+        })
+    }
+}
+
+module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost };

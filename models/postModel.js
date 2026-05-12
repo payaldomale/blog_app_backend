@@ -62,4 +62,10 @@ const updatePost = async (id, title, content, status, published_at) => {
     return result.rows[0];
 }
 
-module.exports = { createPost, getAllPosts, getPostById, updatePost };
+const deletePost = async (id) => {
+    const query = `DELETE FROM posts WHERE id=$1`;
+    const result = await db.query(query, [id]);
+    return result.rows[0];
+}
+
+module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost };
