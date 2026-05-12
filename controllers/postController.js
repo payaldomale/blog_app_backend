@@ -70,25 +70,30 @@ const fetchPostById = async (req, res) => {
 
 const updatePostById = async (req, res) => {
     try {
+
         const id = req.params.id;
+
         const { title, content, status } = req.body;
 
-        const post = await updatePost(id);
+        const post = await getPostById(id);
+
         if (!post) {
             return res.status(404).json({
                 message: "Post not found",
                 status_code: 404
-            })
+            });
         }
+
         if (post.author_id !== req.user.id) {
             return res.status(403).json({
                 success: false,
                 message: "Unauthorized",
             });
         }
+
         const published_at =
             status === "published"
-                ? existingPost.published_at || new Date()
+                ? post.published_at || new Date()
                 : null;
 
         const updatedPost = await updatePost(
@@ -104,14 +109,16 @@ const updatePostById = async (req, res) => {
             message: "Post updated successfully",
             data: updatedPost,
         });
-    }
-    catch (err) {
+
+    } catch (err) {
+
+        console.log("error:", err);
+
         res.status(500).json({
             message: err.message,
             status_code: 500
-        })
-        console.log("error:", err);
+        });
     }
-}
+};
 
 module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById };

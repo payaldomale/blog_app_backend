@@ -170,7 +170,7 @@ Use migrations when:
 ➡️ Password reset
 ➡️ Role-based auth
 
-----------------------------------------------------------
+-------------------------------------------
 | Field         | Why backend controls it |
 | ------------- | ----------------------- |
 | id            | auto-generated PK       |

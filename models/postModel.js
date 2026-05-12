@@ -37,7 +37,7 @@ const createPost = async (
 const getAllPosts = async () => {
     const query = `SELECT * FROM posts`;
     const result = await db.query(query);
-    return result.rows[0];
+    return result.rows;
 }
 
 const getPostById = async (postId) => {
@@ -50,11 +50,11 @@ const updatePost = async (id, title, content, status, published_at) => {
     const query = `UPDATE posts SET title = $1, content = $2, status = $3, published_at = $4, updated_at = NOW() WHERE id = $5 RETURNING *`;
 
     const values = [
-        id,
         title,
         content,
         status,
         published_at,
+        id
     ];
 
     const result = await db.query(query, values);
