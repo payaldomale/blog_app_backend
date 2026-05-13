@@ -62,6 +62,12 @@ const fetchPostById = async (req, res) => {
             status_code: 404
         });
     }
+    if (post.is_deleted === true) {
+        res.status(404).json({
+            message: "cannot fetch deleted post",
+            status_code: 404
+        })
+    }
     res.status(200).json({
         post: post,
         status_code: 200
@@ -82,6 +88,13 @@ const updatePostById = async (req, res) => {
                 message: "Post not found",
                 status_code: 404
             });
+        }
+
+        if (post.is_deleted === true) {
+            res.status(404).json({
+                message: "cannot update deleted post",
+                status_code: 404
+            })
         }
 
         if (post.author_id !== req.user.id) {
@@ -132,6 +145,22 @@ const removePost = async (req, res) => {
             })
         }
         const rmvpost = await deletePost(id);
+
+        if (!rmvpost) {
+            res.status(404).json({
+                message: "post not found",
+                id,
+                status_code: 404
+            })
+        }
+
+        if (rmvpost.is_deleted === true) {
+            res.status(404).json({
+                message: "Already deleted",
+                status_code: 404
+            })
+        }
+
         res.status(200).json({
             message: "post successfully deleted",
             id,
