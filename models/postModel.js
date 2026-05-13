@@ -69,4 +69,10 @@ const deletePost = async (id) => {
     return result.rows[0];
 }
 
-module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost };
+const getPostsByUser = async (userId) => {
+    const query = `SELECT  id, title, content, status, published_at, like_count, comment_count FROM posts WHERE author_id=$1`;
+    const result = await db.query(query, [userId]);
+    return result.rows[0];
+}
+
+module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser };

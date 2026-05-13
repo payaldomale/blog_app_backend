@@ -1,4 +1,4 @@
-const { createPost, getAllPosts, getPostById, updatePost, deletePost } = require("../models/postModel");
+const { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser } = require("../models/postModel");
 const { generateSlug } = require("../utils/slugify");
 
 const addPost = async (req, res) => {
@@ -176,5 +176,7 @@ const removePost = async (req, res) => {
         })
     }
 }
+
+
 
 module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost };
