@@ -182,3 +182,31 @@ Use migrations when:
 | created_at    | DB timestamp            |
 | updated_at    | DB timestamp            |
 
+**************Recommended-learning-order*************
+
+1. Strong React fundamentals
+2. TypeScript
+3. Next.js
+4. API integration
+5. GraphQL basics
+6. AI API integration
+7. Streaming/chat UI patterns
+
+*****************************************************
+
+1. Next.js
+2. TypeScript
+3. Tailwind
+4. GraphQL
+5. OpenAI integration
+6. PostgreSQL
+
+*************************Full product engineering + AI-integrated frontend****************************
+
+1. Next.js
+2. GraphQL
+3. AI/Agentic AI concepts
+4. streaming UIs
+5. backend integration
+6. SSR/SEO/performance
+7. full-stack capabilities
