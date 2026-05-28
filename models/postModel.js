@@ -75,4 +75,10 @@ const getPostsByUser = async (userId) => {
     return result.rows;
 }
 
-module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser };
+const publishDraft = async (userId) => {
+    const query = `UPDATE posts SET status = 'published', published_at = NOW(), updated_at = NOW() WHERE id = $1 RETURNING *`;
+    const result = await db.query(query, [userId]);
+    return result.rows[0];
+}
+
+module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft };

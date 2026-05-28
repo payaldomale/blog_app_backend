@@ -1,4 +1,4 @@
-const { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser } = require("../models/postModel");
+const { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft } = require("../models/postModel");
 const { generateSlug } = require("../utils/slugify");
 
 const addPost = async (req, res) => {
@@ -194,12 +194,60 @@ const fetchPostsByUser = async (req, res) => {
         })
     }
     catch (err) {
+        console.log("error:", err);
         res.status(500).json({
             message: "something went wrong",
             status_code: 500,
             error: err
         })
-        console.log("error:", err)
     }
 }
-module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost, fetchPostsByUser };
+const publishPost = async (req, res) => {
+    try {
+
+        const id = req.params.id;
+
+        const post = await getPostById(id);
+
+        if (!post) {
+            return res.status(404).json({
+                message: "Post not found",
+                status_code: 404,
+            });
+        }
+
+        if (post.author_id !== req.user.id) {
+            return res.status(403).json({
+                message: "Unauthorized",
+                status_code: 403
+            });
+        }
+
+        if (post.status === "published") {
+            return res.status(400).json({
+                message: "Post already published",
+                status_code: 400
+            });
+        }
+
+        const publishedPost = await publishDraft(id);
+
+        return res.status(200).json({
+            message: "Post published successfully",
+            status_code: 200,
+            data: publishedPost
+        });
+
+    } catch (err) {
+
+        console.log("error:", err);
+
+        return res.status(500).json({
+            message: "Something went wrong",
+            status_code: 500,
+            error: err.message
+        });
+    }
+};
+
+module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost, fetchPostsByUser, publishPost };
