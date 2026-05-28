@@ -1,4 +1,4 @@
-const { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft } = require("../models/postModel");
+const { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft, getPublishedPosts } = require("../models/postModel");
 const { generateSlug } = require("../utils/slugify");
 
 const addPost = async (req, res) => {
@@ -250,4 +250,27 @@ const publishPost = async (req, res) => {
     }
 };
 
-module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost, fetchPostsByUser, publishPost };
+const fetchPublishedPosts = async (req, res) => {
+    try {
+
+        const posts = await getPublishedPosts();
+
+        return res.status(200).json({
+            message: "Published posts fetched successfully",
+            status_code: 200,
+            data: posts
+        });
+
+    } catch (err) {
+
+        console.log("error:", err);
+
+        return res.status(500).json({
+            message: "Something went wrong",
+            status_code: 500,
+            error: err.message
+        });
+    }
+};
+
+module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost, fetchPostsByUser, publishPost, fetchPublishedPosts };

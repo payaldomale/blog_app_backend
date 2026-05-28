@@ -81,4 +81,16 @@ const publishDraft = async (userId) => {
     return result.rows[0];
 }
 
-module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft };
+const getPublishedPosts = async () => {
+    const query = `
+        SELECT id, title, content, author_id, published_at, like_count, comment_count
+        FROM posts
+        WHERE status = 'published'
+        ORDER BY published_at DESC;
+    `;
+
+    const result = await db.query(query);
+    return result.rows;
+};
+
+module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft, getPublishedPosts };
