@@ -177,6 +177,29 @@ const removePost = async (req, res) => {
     }
 }
 
-
-
-module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost };
+const fetchPostsByUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        if (!userId) {
+            res.status(400).json({
+                message: "userId is required",
+                status_code: 400
+            })
+        }
+        const posts = await getPostsByUser(userId);
+        return res.status(200).json({
+            message: "Posts by user fetched successfully",
+            status_code: 200,
+            data: posts
+        })
+    }
+    catch (err) {
+        res.status(500).json({
+            message: "something went wrong",
+            status_code: 500,
+            error: err
+        })
+        console.log("error:", err)
+    }
+}
+module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost, fetchPostsByUser };
