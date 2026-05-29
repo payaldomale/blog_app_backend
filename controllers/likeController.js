@@ -1,4 +1,5 @@
 const { likePost, getLike, unlikePost } = require("../models/likeModel");
+const { getPublishedPostById } = require("../models/postModel");
 
 const addLike = async (req, res) => {
 
