@@ -37,70 +37,73 @@ const addPost = async (req, res) => {
 }
 
 const fetchAllPosts = async (req, res) => {
+
     try {
+
         const result = await getAllPosts();
-        res.status(200).json({
-            posts: result,
-            status_code: 200
+
+        const filtered = result.filter(p => !p.is_deleted);
+
+        return res.status(200).json({
+            posts: filtered
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
         });
     }
-    catch (err) {
-        res.status(500).json({
-            message: err.message,
-            status_code: 500
-        })
-        console.log("error:", err);
-    }
-}
+};
 
 const fetchPostById = async (req, res) => {
-    const userId = req.params.id;
-    const post = await getPostById(userId);
-    if (!post) {
-        return res.status(404).json({
-            message: "Post not found",
-            status_code: 404
-        });
-    }
-    if (post.is_deleted === true) {
-        res.status(404).json({
-            message: "cannot fetch deleted post",
-            status_code: 404
-        })
-    }
-    res.status(200).json({
-        post: post,
-        status_code: 200
-    })
-}
 
-const updatePostById = async (req, res) => {
     try {
 
         const id = req.params.id;
-
-        const { title, content, status } = req.body;
 
         const post = await getPostById(id);
 
         if (!post) {
             return res.status(404).json({
-                message: "Post not found",
-                status_code: 404
+                message: "Post not found"
             });
         }
 
-        if (post.is_deleted === true) {
-            res.status(404).json({
-                message: "cannot update deleted post",
-                status_code: 404
-            })
+        if (post.is_deleted) {
+            return res.status(404).json({
+                message: "Post is deleted"
+            });
+        }
+
+        return res.status(200).json({
+            post
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+};
+
+const updatePostById = async (req, res) => {
+
+    try {
+
+        const id = req.params.id;
+        const { title, content, status } = req.body;
+
+        const post = await getPostById(id);
+
+        if (!post || post.is_deleted) {
+            return res.status(404).json({
+                message: "Post not found"
+            });
         }
 
         if (post.author_id !== req.user.id) {
             return res.status(403).json({
-                success: false,
-                message: "Unauthorized",
+                message: "Unauthorized"
             });
         }
 
@@ -117,65 +120,56 @@ const updatePostById = async (req, res) => {
             published_at
         );
 
-        res.status(200).json({
-            success: true,
-            message: "Post updated successfully",
-            data: updatedPost,
+        return res.status(200).json({
+            message: "Updated successfully",
+            data: updatedPost
         });
 
     } catch (err) {
-
-        console.log("error:", err);
-
-        res.status(500).json({
-            message: err.message,
-            status_code: 500
+        return res.status(500).json({
+            message: err.message
         });
     }
 };
 
 const removePost = async (req, res) => {
+
     try {
+
         const id = req.params.id;
-        if (!id) {
-            res.status(404).json({
-                message: "id not found",
-                id,
-                status_code: 404
-            })
-        }
-        const rmvpost = await deletePost(id);
 
-        if (!rmvpost) {
-            res.status(404).json({
-                message: "post not found",
-                id,
-                status_code: 404
-            })
+        const post = await getPostById(id);
+
+        if (!post) {
+            return res.status(404).json({
+                message: "Post not found"
+            });
         }
 
-        if (rmvpost.is_deleted === true) {
-            res.status(404).json({
-                message: "Already deleted",
-                status_code: 404
-            })
+        if (post.author_id !== req.user.id) {
+            return res.status(403).json({
+                message: "Unauthorized"
+            });
         }
 
-        res.status(200).json({
-            message: "post successfully deleted",
-            id,
-            status_code: 200
-        })
+        const deleted = await deletePost(id);
 
+        if (!deleted) {
+            return res.status(400).json({
+                message: "Already deleted"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Post deleted successfully"
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
     }
-    catch (err) {
-        console.log("error:", err);
-        res.status(500).json({
-            message: err.message,
-            status_code: 500
-        })
-    }
-}
+};
 
 const fetchPostsByUser = async (req, res) => {
     try {
@@ -203,49 +197,41 @@ const fetchPostsByUser = async (req, res) => {
     }
 }
 const publishPost = async (req, res) => {
+
     try {
 
         const id = req.params.id;
 
         const post = await getPostById(id);
 
-        if (!post) {
+        if (!post || post.is_deleted) {
             return res.status(404).json({
-                message: "Post not found",
-                status_code: 404,
+                message: "Post not found"
             });
         }
 
         if (post.author_id !== req.user.id) {
             return res.status(403).json({
-                message: "Unauthorized",
-                status_code: 403
+                message: "Unauthorized"
             });
         }
 
         if (post.status === "published") {
             return res.status(400).json({
-                message: "Post already published",
-                status_code: 400
+                message: "Already published"
             });
         }
 
         const publishedPost = await publishDraft(id);
 
         return res.status(200).json({
-            message: "Post published successfully",
-            status_code: 200,
+            message: "Published successfully",
             data: publishedPost
         });
 
     } catch (err) {
-
-        console.log("error:", err);
-
         return res.status(500).json({
-            message: "Something went wrong",
-            status_code: 500,
-            error: err.message
+            message: err.message
         });
     }
 };

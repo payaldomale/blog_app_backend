@@ -75,11 +75,20 @@ const getPostsByUser = async (userId) => {
     return result.rows;
 }
 
-const publishDraft = async (userId) => {
-    const query = `UPDATE posts SET status = 'published', published_at = NOW(), updated_at = NOW() WHERE id = $1 RETURNING *`;
-    const result = await db.query(query, [userId]);
+const publishDraft = async (postId) => {
+
+    const query = `
+        UPDATE posts
+        SET status = 'published',
+            published_at = NOW(),
+            updated_at = NOW()
+        WHERE id = $1
+        RETURNING *;
+    `;
+
+    const result = await db.query(query, [postId]);
     return result.rows[0];
-}
+};
 
 const getPublishedPosts = async () => {
     const query = `
@@ -93,4 +102,18 @@ const getPublishedPosts = async () => {
     return result.rows;
 };
 
-module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft, getPublishedPosts };
+const getPublishedPostById = async (postId) => {
+
+    const query = `
+        SELECT *
+        FROM posts
+        WHERE id = $1
+        AND status = 'published'
+        AND is_deleted = FALSE;
+    `;
+
+    const result = await db.query(query, [postId]);
+    return result.rows[0];
+};
+
+module.exports = { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft, getPublishedPosts, getPublishedPostById };

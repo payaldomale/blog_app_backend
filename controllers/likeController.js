@@ -5,49 +5,37 @@ const addLike = async (req, res) => {
     try {
 
         const user_id = req.user.id;
-
         const post_id = req.params.postId;
 
-        if (!post_id) {
-            return res.status(400).json({
-                message: "post_id is required",
-                status_code: 400
+        // ❌ BLOCK DRAFT POSTS
+        const post = await getPublishedPostById(post_id);
+
+        if (!post) {
+            return res.status(403).json({
+                message: "Cannot like draft or deleted post"
             });
         }
 
-        // check if already liked
-        const existingLike = await getLike(
-            user_id,
-            post_id
-        );
+        // ❌ prevent duplicate like
+        const existingLike = await getLike(user_id, post_id);
 
         if (existingLike) {
             return res.status(400).json({
-                message: "Post already liked",
-                status_code: 400
+                message: "Already liked"
             });
         }
 
-        // add like + increment count
-        const like = await likePost(
-            user_id,
-            post_id
-        );
+        const like = await likePost(user_id, post_id);
 
         return res.status(201).json({
-            message: "Post liked successfully",
-            status_code: 201,
+            message: "Liked successfully",
             data: like
         });
 
     } catch (err) {
 
-        console.log(err);
-
         return res.status(500).json({
-            message: "Something went wrong",
-            status_code: 500,
-            error: err.message
+            message: err.message
         });
     }
 };
@@ -57,47 +45,34 @@ const removeLike = async (req, res) => {
     try {
 
         const user_id = req.user.id;
-
         const post_id = req.params.postId;
 
-        if (!post_id) {
-            return res.status(400).json({
-                message: "post_id is required",
-                status_code: 400
+        const post = await getPublishedPostById(post_id);
+
+        if (!post) {
+            return res.status(403).json({
+                message: "Cannot unlike draft or deleted post"
             });
         }
 
-        // check if like exists
-        const existingLike = await getLike(
-            user_id,
-            post_id
-        );
+        const existingLike = await getLike(user_id, post_id);
 
         if (!existingLike) {
             return res.status(404).json({
-                message: "Like not found",
-                status_code: 404
+                message: "Like not found"
             });
         }
 
-        await unlikePost(
-            user_id,
-            post_id
-        );
+        await unlikePost(user_id, post_id);
 
         return res.status(200).json({
-            message: "Post unliked successfully",
-            status_code: 200
+            message: "Unliked successfully"
         });
 
     } catch (err) {
 
-        console.log(err);
-
         return res.status(500).json({
-            message: "Something went wrong",
-            status_code: 500,
-            error: err.message
+            message: err.message
         });
     }
 };

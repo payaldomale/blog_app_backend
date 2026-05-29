@@ -1,13 +1,17 @@
 const { createComment, getCommentsByPost, updateComment, getCommentById, deleteComment } = require("../models/commentsModel");
+const { getPublishedPostById } = require("../models/postModel");
 
 const addComment = async (req, res) => {
+
     try {
+
         const { post_id, content } = req.body;
 
-        if (!post_id || !content) {
-            return res.status(400).json({
-                message: "post_id and content are required",
-                status_code: 400
+        const post = await getPublishedPostById(post_id);
+
+        if (!post) {
+            return res.status(403).json({
+                message: "Cannot comment on draft or deleted post"
             });
         }
 
@@ -18,17 +22,14 @@ const addComment = async (req, res) => {
         );
 
         return res.status(201).json({
-            message: "Comment created successfully",
-            status_code: 201,
+            message: "Comment added",
             data: comment
         });
 
     } catch (err) {
-        console.log(err);
+
         return res.status(500).json({
-            message: "Something went wrong",
-            status_code: 500,
-            error: err.message
+            message: err.message
         });
     }
 };
@@ -56,38 +57,37 @@ const getComments = async (req, res) => {
 };
 
 const editComment = async (req, res) => {
+
     try {
+
         const id = req.params.id;
         const { content } = req.body;
 
-        const comment = await updateComment(id, content);
+        const comment = await getCommentById(id);
 
-        if (!comment) {
+        if (!comment || comment.is_deleted) {
             return res.status(404).json({
-                message: "Comment not found",
-                status_code: 404
+                message: "Comment not found"
             });
         }
 
         if (comment.author_id !== req.user.id) {
             return res.status(403).json({
-                message: "Unauthorized",
-                status_code: 403
+                message: "Unauthorized"
             });
         }
 
+        const updated = await updateComment(id, content);
+
         return res.status(200).json({
-            message: "Comment updated successfully",
-            status_code: 200,
-            data: comment
+            message: "Comment updated",
+            data: updated
         });
 
     } catch (err) {
-        console.log(err);
+
         return res.status(500).json({
-            message: "Something went wrong",
-            status_code: 500,
-            error: err.message
+            message: err.message
         });
     }
 };
@@ -100,43 +100,29 @@ const removeComment = async (req, res) => {
 
         const comment = await getCommentById(id);
 
-        if (!comment) {
+        if (!comment || comment.is_deleted) {
             return res.status(404).json({
-                message: "Comment not found",
-                status_code: 404
+                message: "Comment not found"
             });
         }
 
         if (comment.author_id !== req.user.id) {
             return res.status(403).json({
-                message: "Unauthorized",
-                status_code: 403
+                message: "Unauthorized"
             });
         }
 
-        if (comment.is_deleted) {
-            return res.status(400).json({
-                message: "Comment already deleted",
-                status_code: 400
-            });
-        }
-
-        const deletedComment = await deleteComment(id);
+        const deleted = await deleteComment(id, comment.post_id);
 
         return res.status(200).json({
-            message: "Comment deleted successfully",
-            status_code: 200,
-            data: deletedComment
+            message: "Comment deleted",
+            data: deleted
         });
 
     } catch (err) {
 
-        console.log("error:", err);
-
         return res.status(500).json({
-            message: "Something went wrong",
-            status_code: 500,
-            error: err.message
+            message: err.message
         });
     }
 };
