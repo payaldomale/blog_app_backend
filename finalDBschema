@@ -210,3 +210,25 @@ Use migrations when:
 5. backend integration
 6. SSR/SEO/performance
 7. full-stack capabilities
+
+****************************************************************
+Add polish:
+
+dark mode
+animations (Framer Motion)
+responsive UI
+
+***********How-to-use-pagination-sort-filter-routes*************
+
+🔥 Pagination
+1. GET /posts?page=1&limit=10
+
+🔥 Sorting
+2. GET /posts?sortBy=like_count&order=desc
+
+🔥 Filtering
+3. GET /posts?status=published
+4. GET /posts?userId=5
+
+🔥 Combined (REAL WORLD USE)
+5. GET /posts?page=1&limit=10&sortBy=like_count&order=desc&status=published

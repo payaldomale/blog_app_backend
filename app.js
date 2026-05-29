@@ -8,6 +8,8 @@ const authRoutes = require("./routes/authRoutes");
 const postRoutes = require("./routes/postRoutes");
 const commentsRoutes = require("./routes/commentsRoutes");
 const likesRoutes = require("./routes/likeRoutes");
+const tagRoutes = require("./routes/tagRoutes");
+const postQueryRoutes = require("./routes/postQueryRoutes");
 
 app.use(express.json());
 app.use(cors());
@@ -18,6 +20,8 @@ app.use("/api", authRoutes);
 app.use("/api", postRoutes);
 app.use("/api", commentsRoutes);
 app.use("/api", likesRoutes);
+app.use("/api", tagRoutes);
+app.use("/api", postQueryRoutes);
 
 app.listen(process.env.PORT, () => {
     console.log(`server is running on port ${process.env.PORT}`);
