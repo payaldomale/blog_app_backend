@@ -232,3 +232,80 @@ responsive UI
 
 🔥 Combined (REAL WORLD USE)
 5. GET /posts?page=1&limit=10&sortBy=like_count&order=desc&status=published
+
+**************************************************************************FRONTEND****************************************************************
+*****************React-Commands*************
+npm create vite@latest . -- --template react    
+npm install react@18.2.0 react-dom@18.2.0
+npm list 
+npm list react
+
+npm install react-router-dom axios zustand
+npm install @tanstack/react-query
+npm install react-hook-form zod @hookform/resolvers
+npm install react-hot-toast react-icons date-fns
+npm install @tiptap/react @tiptap/starter-kit
+
+
+********************Main.jsx**************
+
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.jsx";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </StrictMode>
+);
+
+**********************************************
+
+src/
+├── api/
+├── components/
+├── features/
+│   ├── posts/
+│   ├── auth/
+│   ├── ai/
+├── hooks/
+├── pages/
+├── store/
+├── routes/
+├── layouts/
+
+***********************************************
+
+
+Phase 1 (Today–Tomorrow)
+
+✔ Posts UI
+✔ API connection
+✔ Basic routing
+
+Phase 2
+
+✔ Auth (login/register)
+✔ Zustand store
+
+Phase 3
+
+✔ Infinite scroll (TanStack Query)
+
+Phase 4
+
+✔ Rich text editor (Tiptap)
+
+Phase 5
+
+✔ AI integration (future)
+
+***********************************************
+
