@@ -1,15 +1,45 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
-const { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost, fetchPostsByUser, publishPost, fetchPublishedPosts } = require("../controllers/postController");
+
+const {
+    addPost,
+    fetchAllPosts,
+    fetchPostById,
+    updatePostById,
+    removePost,
+    fetchPostsByUser,
+    publishPost,
+    fetchPublishedPosts
+} = require("../controllers/postController");
+
 const router = express.Router();
 
+/* ---------------- POSTS ---------------- */
+
+// Create post
 router.post("/post/create", authMiddleware, addPost);
+
+// Get all posts (admin/internal)
 router.get("/post/getAllPosts", authMiddleware, fetchAllPosts);
-router.get("/post/getPostbyId/:id", authMiddleware, fetchPostById);
+
+// Get single post
+router.get("/post/getPostById/:id", authMiddleware, fetchPostById);
+
+// Update post
 router.put("/post/updatePost/:id", authMiddleware, updatePostById);
-router.put("/post/removePost/:id", authMiddleware, removePost);
+
+// Delete post (soft delete)
+router.delete("/post/removePost/:id", authMiddleware, removePost);
+
+// Get posts by user
 router.get("/post/getPostsByUser/:id", authMiddleware, fetchPostsByUser);
+
+// Publish post
 router.put("/post/publish/:id", authMiddleware, publishPost);
-router.get("/post/published", authMiddleware, fetchPublishedPosts);
+
+/* ---------------- PUBLIC ---------------- */
+
+// Public feed (IMPORTANT FIX)
+router.get("/post/published", fetchPublishedPosts);
 
 module.exports = router;

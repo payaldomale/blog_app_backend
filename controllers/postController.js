@@ -1,6 +1,17 @@
-const { createPost, getAllPosts, getPostById, updatePost, deletePost, getPostsByUser, publishDraft, getPublishedPosts } = require("../models/postModel");
+const {
+    createPost,
+    getAllPosts,
+    getPostById,
+    updatePost,
+    deletePost,
+    getPostsByUser,
+    publishDraft,
+    getPublishedPosts
+} = require("../models/postModel");
+
 const { generateSlug } = require("../utils/slugify");
 
+/* ---------------- CREATE POST ---------------- */
 const addPost = async (req, res) => {
     try {
         const { title, content, status } = req.body;
@@ -10,36 +21,33 @@ const addPost = async (req, res) => {
         const published_at =
             status === "published" ? new Date() : null;
 
-        const posts = await createPost(
+        const post = await createPost(
             req.user.id,
             title,
             slug,
             content,
             status,
-            published_at,
+            published_at
         );
-        res.status(201).json(
-            {
-                message: "post successfully created",
-                data: posts,
-                status_code: 201
-            }
-        )
-    }
-    catch (err) {
-        res.status(500).json({
+
+        return res.status(201).json({
+            message: "post successfully created",
+            data: post,
+            status_code: 201
+        });
+
+    } catch (err) {
+        return res.status(500).json({
             message: "Something went wrong",
-            error: err,
+            error: err.message,
             status_code: 500
-        })
-        console.log("error:", err)
+        });
     }
-}
+};
 
+/* ---------------- GET ALL POSTS ---------------- */
 const fetchAllPosts = async (req, res) => {
-
     try {
-
         const result = await getAllPosts();
 
         const filtered = result.filter(p => !p.is_deleted);
@@ -55,23 +63,16 @@ const fetchAllPosts = async (req, res) => {
     }
 };
 
+/* ---------------- GET POST BY ID ---------------- */
 const fetchPostById = async (req, res) => {
-
     try {
-
         const id = req.params.id;
 
         const post = await getPostById(id);
 
-        if (!post) {
+        if (!post || post.is_deleted) {
             return res.status(404).json({
                 message: "Post not found"
-            });
-        }
-
-        if (post.is_deleted) {
-            return res.status(404).json({
-                message: "Post is deleted"
             });
         }
 
@@ -86,10 +87,9 @@ const fetchPostById = async (req, res) => {
     }
 };
 
+/* ---------------- UPDATE POST ---------------- */
 const updatePostById = async (req, res) => {
-
     try {
-
         const id = req.params.id;
         const { title, content, status } = req.body;
 
@@ -101,7 +101,8 @@ const updatePostById = async (req, res) => {
             });
         }
 
-        if (post.author_id !== req.user.id) {
+        // ✅ FIXED: type-safe check
+        if (Number(post.author_id) !== Number(req.user.id)) {
             return res.status(403).json({
                 message: "Unauthorized"
             });
@@ -132,21 +133,21 @@ const updatePostById = async (req, res) => {
     }
 };
 
+/* ---------------- DELETE POST (SOFT DELETE) ---------------- */
 const removePost = async (req, res) => {
-
     try {
-
         const id = req.params.id;
 
         const post = await getPostById(id);
 
-        if (!post) {
+        if (!post || post.is_deleted) {
             return res.status(404).json({
                 message: "Post not found"
             });
         }
 
-        if (post.author_id !== req.user.id) {
+        // ✅ FIXED: type-safe check
+        if (Number(post.author_id) !== Number(req.user.id)) {
             return res.status(403).json({
                 message: "Unauthorized"
             });
@@ -171,35 +172,38 @@ const removePost = async (req, res) => {
     }
 };
 
+/* ---------------- POSTS BY USER ---------------- */
 const fetchPostsByUser = async (req, res) => {
     try {
         const userId = req.params.id;
+
         if (!userId) {
-            res.status(400).json({
+            return res.status(400).json({
                 message: "userId is required",
                 status_code: 400
-            })
+            });
         }
+
         const posts = await getPostsByUser(userId);
+
         return res.status(200).json({
             message: "Posts by user fetched successfully",
             status_code: 200,
             data: posts
-        })
-    }
-    catch (err) {
-        console.log("error:", err);
-        res.status(500).json({
+        });
+
+    } catch (err) {
+        return res.status(500).json({
             message: "something went wrong",
             status_code: 500,
-            error: err
-        })
+            error: err.message
+        });
     }
-}
+};
+
+/* ---------------- PUBLISH POST ---------------- */
 const publishPost = async (req, res) => {
-
     try {
-
         const id = req.params.id;
 
         const post = await getPostById(id);
@@ -210,7 +214,8 @@ const publishPost = async (req, res) => {
             });
         }
 
-        if (post.author_id !== req.user.id) {
+        // ✅ FIXED: type-safe check
+        if (Number(post.author_id) !== Number(req.user.id)) {
             return res.status(403).json({
                 message: "Unauthorized"
             });
@@ -236,9 +241,9 @@ const publishPost = async (req, res) => {
     }
 };
 
+/* ---------------- GET PUBLISHED POSTS ---------------- */
 const fetchPublishedPosts = async (req, res) => {
     try {
-
         const posts = await getPublishedPosts();
 
         return res.status(200).json({
@@ -248,9 +253,6 @@ const fetchPublishedPosts = async (req, res) => {
         });
 
     } catch (err) {
-
-        console.log("error:", err);
-
         return res.status(500).json({
             message: "Something went wrong",
             status_code: 500,
@@ -259,4 +261,13 @@ const fetchPublishedPosts = async (req, res) => {
     }
 };
 
-module.exports = { addPost, fetchAllPosts, fetchPostById, updatePostById, removePost, fetchPostsByUser, publishPost, fetchPublishedPosts };
+module.exports = {
+    addPost,
+    fetchAllPosts,
+    fetchPostById,
+    updatePostById,
+    removePost,
+    fetchPostsByUser,
+    publishPost,
+    fetchPublishedPosts
+};
