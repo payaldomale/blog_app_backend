@@ -1,13 +1,15 @@
 const User = require("../models/auth");
-const { hashPassword } = require("../utils/hash");
-const { comparePassword } = require("../utils/hash");
+const { hashPassword, comparePassword } = require("../utils/hash");
 const { generateToken } = require("../utils/token");
 
+// SIGNUP
 const signup = async (req, res) => {
     try {
         const { email, password } = req.body;
 
         const existingUser = await User.findUserByEmail(email);
+
+        // ❌ block if exists (even deleted users - strict mode)
         if (existingUser) {
             return res.status(400).json({
                 message: "User already exists",
@@ -15,8 +17,8 @@ const signup = async (req, res) => {
             });
         }
 
-        // const user = await User.createUser(email, password);
         const hashedPassword = await hashPassword(password);
+
         const user = await User.createUser(email, hashedPassword);
 
         res.status(201).json({
@@ -34,20 +36,30 @@ const signup = async (req, res) => {
     }
 };
 
+// LOGIN (FIXED)
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
         const user = await User.findUserByEmail(email);
+
         if (!user) {
             return res.status(400).json({
                 message: "User not found",
                 status_code: 400
             });
         }
-        // console.log("user:", user)
+
+        // 🔥 IMPORTANT FIX: BLOCK DELETED USERS
+        if (user.is_deleted === true || user.deleted_at !== null) {
+            return res.status(403).json({
+                message: "Account is deleted. Please contact support.",
+                status_code: 403
+            });
+        }
+
         const isMatch = await comparePassword(password, user.password_hash);
-        // console.log("ismatch:", isMatch)
+
         if (!isMatch) {
             return res.status(400).json({
                 message: "Incorrect password",
@@ -60,7 +72,12 @@ const login = async (req, res) => {
         res.status(200).json({
             message: "User successfully logged in",
             token,
-            user: { id: user.id, email: user.email, role: user.role },
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                username: user.username
+            },
             status_code: 200
         });
 

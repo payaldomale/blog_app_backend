@@ -23,7 +23,7 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-    console.log("AUTH HEADER:", req.headers.authorization);
+    // console.log("AUTH HEADER:", req.headers.authorization);
 
     const authHeader = req.headers.authorization;
 
@@ -38,7 +38,7 @@ const authMiddleware = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("DECODED:", decoded);
+        // console.log("DECODED:", decoded);
 
         req.user = decoded;
         next();
