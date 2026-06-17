@@ -1,28 +1,26 @@
 const { likePost, getLike, unlikePost } = require("../models/likeModel");
 const { getPublishedPostById } = require("../models/postModel");
 
+// LIKE
 const addLike = async (req, res) => {
-
     try {
-
         const user_id = req.user.id;
-        const post_id = req.params.postId;
+        const post_id = Number(req.params.postId);
 
-        // ❌ BLOCK DRAFT POSTS
         const post = await getPublishedPostById(post_id);
-
         if (!post) {
             return res.status(403).json({
                 message: "Cannot like draft or deleted post"
             });
         }
 
-        // ❌ prevent duplicate like
         const existingLike = await getLike(user_id, post_id);
 
         if (existingLike) {
-            return res.status(400).json({
-                message: "Already liked"
+            // 🔥 IMPORTANT: don't throw error, just return success
+            return res.status(200).json({
+                message: "Already liked",
+                data: existingLike
             });
         }
 
@@ -34,22 +32,19 @@ const addLike = async (req, res) => {
         });
 
     } catch (err) {
-
         return res.status(500).json({
             message: err.message
         });
     }
 };
 
+// UNLIKE
 const removeLike = async (req, res) => {
-
     try {
-
         const user_id = req.user.id;
-        const post_id = req.params.postId;
+        const post_id = Number(req.params.postId);
 
         const post = await getPublishedPostById(post_id);
-
         if (!post) {
             return res.status(403).json({
                 message: "Cannot unlike draft or deleted post"
@@ -59,8 +54,8 @@ const removeLike = async (req, res) => {
         const existingLike = await getLike(user_id, post_id);
 
         if (!existingLike) {
-            return res.status(404).json({
-                message: "Like not found"
+            return res.status(200).json({
+                message: "Already unliked"
             });
         }
 
@@ -71,11 +66,28 @@ const removeLike = async (req, res) => {
         });
 
     } catch (err) {
-
         return res.status(500).json({
             message: err.message
         });
     }
 };
 
-module.exports = { addLike, removeLike };
+const checkLikeStatus = async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const post_id = req.params.postId;
+
+        const like = await getLike(user_id, post_id);
+
+        return res.status(200).json({
+            liked: !!like
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+};
+
+module.exports = { addLike, removeLike, checkLikeStatus };

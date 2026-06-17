@@ -34,25 +34,38 @@ const createPost = async (
     return result.rows[0];
 };
 
-/* ---------------- GET ALL POSTS (ACTIVE ONLY) ---------------- */
+/* ---------------- GET ALL POSTS ---------------- */
 const getAllPosts = async () => {
     const query = `
-        SELECT *
-        FROM posts
-        WHERE is_deleted = FALSE
+        SELECT
+            p.*,
+            (
+                SELECT COUNT(*)
+                FROM likes l
+                WHERE l.post_id = p.id
+            )::INT AS like_count
+        FROM posts p
+        WHERE p.is_deleted = FALSE
+        ORDER BY p.created_at DESC;
     `;
 
     const result = await db.query(query);
     return result.rows;
 };
 
-/* ---------------- GET POST BY ID (IMPORTANT FIX) ---------------- */
+/* ---------------- GET POST BY ID ---------------- */
 const getPostById = async (postId) => {
     const query = `
-        SELECT *
-        FROM posts
-        WHERE id = $1
-        AND is_deleted = FALSE
+        SELECT
+            p.*,
+            (
+                SELECT COUNT(*)
+                FROM likes l
+                WHERE l.post_id = p.id
+            )::INT AS like_count
+        FROM posts p
+        WHERE p.id = $1
+        AND p.is_deleted = FALSE;
     `;
 
     const result = await db.query(query, [postId]);
@@ -60,10 +73,17 @@ const getPostById = async (postId) => {
 };
 
 /* ---------------- UPDATE POST ---------------- */
-const updatePost = async (id, title, content, status, published_at) => {
+const updatePost = async (
+    id,
+    title,
+    content,
+    status,
+    published_at
+) => {
     const query = `
         UPDATE posts
-        SET title = $1,
+        SET
+            title = $1,
             content = $2,
             status = $3,
             published_at = $4,
@@ -73,17 +93,24 @@ const updatePost = async (id, title, content, status, published_at) => {
         RETURNING *;
     `;
 
-    const values = [title, content, status, published_at, id];
+    const values = [
+        title,
+        content,
+        status,
+        published_at,
+        id
+    ];
 
     const result = await db.query(query, values);
     return result.rows[0];
 };
 
-/* ---------------- SOFT DELETE POST ---------------- */
+/* ---------------- DELETE POST ---------------- */
 const deletePost = async (id) => {
     const query = `
         UPDATE posts
-        SET is_deleted = TRUE,
+        SET
+            is_deleted = TRUE,
             deleted_at = NOW(),
             updated_at = NOW()
         WHERE id = $1
@@ -95,13 +122,25 @@ const deletePost = async (id) => {
     return result.rows[0];
 };
 
-/* ---------------- POSTS BY USER (ACTIVE ONLY) ---------------- */
+/* ---------------- POSTS BY USER ---------------- */
 const getPostsByUser = async (userId) => {
     const query = `
-        SELECT id, title, content, status, published_at, like_count, comment_count
-        FROM posts
-        WHERE author_id = $1
-        AND is_deleted = FALSE
+        SELECT
+            p.id,
+            p.title,
+            p.content,
+            p.status,
+            p.published_at,
+            p.comment_count,
+            (
+                SELECT COUNT(*)
+                FROM likes l
+                WHERE l.post_id = p.id
+            )::INT AS like_count
+        FROM posts p
+        WHERE p.author_id = $1
+        AND p.is_deleted = FALSE
+        ORDER BY p.id DESC;
     `;
 
     const result = await db.query(query, [userId]);
@@ -112,7 +151,8 @@ const getPostsByUser = async (userId) => {
 const publishDraft = async (postId) => {
     const query = `
         UPDATE posts
-        SET status = 'published',
+        SET
+            status = 'published',
             published_at = NOW(),
             updated_at = NOW()
         WHERE id = $1
@@ -127,11 +167,22 @@ const publishDraft = async (postId) => {
 /* ---------------- PUBLISHED POSTS ---------------- */
 const getPublishedPosts = async () => {
     const query = `
-        SELECT id, title, content, author_id, published_at, like_count, comment_count
-        FROM posts
-        WHERE status = 'published'
-        AND is_deleted = FALSE
-        ORDER BY published_at DESC;
+        SELECT
+            p.id,
+            p.title,
+            p.content,
+            p.author_id,
+            p.published_at,
+            p.comment_count,
+            (
+                SELECT COUNT(*)
+                FROM likes l
+                WHERE l.post_id = p.id
+            )::INT AS like_count
+        FROM posts p
+        WHERE p.status = 'published'
+        AND p.is_deleted = FALSE
+        ORDER BY p.published_at DESC;
     `;
 
     const result = await db.query(query);
@@ -141,11 +192,17 @@ const getPublishedPosts = async () => {
 /* ---------------- SINGLE PUBLISHED POST ---------------- */
 const getPublishedPostById = async (postId) => {
     const query = `
-        SELECT *
-        FROM posts
-        WHERE id = $1
-        AND status = 'published'
-        AND is_deleted = FALSE;
+        SELECT
+            p.*,
+            (
+                SELECT COUNT(*)
+                FROM likes l
+                WHERE l.post_id = p.id
+            )::INT AS like_count
+        FROM posts p
+        WHERE p.id = $1
+        AND p.status = 'published'
+        AND p.is_deleted = FALSE;
     `;
 
     const result = await db.query(query, [postId]);
