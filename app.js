@@ -14,6 +14,10 @@ const postQueryRoutes = require("./routes/postQueryRoutes");
 app.use(express.json());
 app.use(cors());
 
+app.get("/", (req, res) => {
+    res.send("API is running successfully 🚀");
+});
+
 app.use("/api", userRoutes);
 app.use("/api", authRoutes);
 app.use("/api", postRoutes);
