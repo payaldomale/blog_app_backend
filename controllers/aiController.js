@@ -1,4 +1,4 @@
-const { generateTitle, generateSummary } = require("../services/geminiService");
+const { generateTitle, generateSummary, generateTags, improveWriting, fixGrammar } = require("../services/geminiService");
 
 /* ---------------- AI TITLE ---------------- */
 const createTitle = async (req, res) => {
@@ -59,4 +59,69 @@ const createSummary = async (req, res) => {
     }
 };
 
-module.exports = { createTitle, createSummary };
+/* ---------------- AI TAGS ---------------- */
+const createTags = async (req, res) => {
+    try {
+        const { content } = req.body;
+
+        const tags = await generateTags(content);
+
+        return res.json({
+            success: true,
+            tags
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "AI tags failed",
+            error: err.message
+        });
+    }
+};
+
+
+/* ---------------- AI IMPROVE ---------------- */
+const createImprovedWriting = async (req, res) => {
+    try {
+        const { content } = req.body;
+
+        const result = await improveWriting(content);
+
+        return res.json({
+            success: true,
+            content: result
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "AI improve writing failed",
+            error: err.message
+        });
+    }
+};
+
+
+/* ---------------- AI GRAMMAR ---------------- */
+const createGrammarFix = async (req, res) => {
+    try {
+        const { content } = req.body;
+
+        const result = await fixGrammar(content);
+
+        return res.json({
+            success: true,
+            content: result
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "AI grammar fix failed",
+            error: err.message
+        });
+    }
+};
+
+module.exports = { createTitle, createSummary, createTags, createImprovedWriting, createGrammarFix };
